@@ -12,6 +12,7 @@ class LiMySQL {
     protected $PassWord;
     protected $ErrorInfo;
     protected $LastInsertId = 0;
+    protected $LastSql='';
     private static $Instance = array();
 
     function __construct ( $Host='127.0.0.1', $Port='3306', $UserName='', $PassWord='', $DBName='', $Charset='utf8' ) {
@@ -19,6 +20,7 @@ class LiMySQL {
         $this->DSNMd5 = md5 ($this->DSN );
         $this->UserName = $UserName;
         $this->PassWord = $PassWord;
+        $this->Env = 'product';
     }
     
     //创建连接
@@ -28,9 +30,8 @@ class LiMySQL {
             try {
                 $ConnObj = new PDO ( $this->DSN, $this->UserName, $this->PassWord );
                 $ConnObj->setAttribute(PDO::ATTR_EMULATE_PREPARES,false);
-            } catch (PDOException $e) {
-                //根据业务逻辑自己定制逻辑
-                if ( true ) {
+            } catch ( PDOException $e ) {
+                if ( $this->Env == 'product' ) {
                     die ('Database connection failed');
                 }else{
                     echo $e->getMessage();
@@ -41,10 +42,11 @@ class LiMySQL {
     }
 
     //执行一条复杂语句
-    public function Query ($Sql) {
+    public function Query ( $Sql ) {
         $PDO = $this->Connect();
         $PDOStatement = $PDO->query($Sql);
-        if(!$PDOStatement){
+        $this->LastSql = $Sql;
+        if( !$PDOStatement ){
             $this->ErrorInfo = $PDO->errorInfo();
             return false;
         }else{
@@ -53,129 +55,126 @@ class LiMySQL {
     }
 
     //从结果集中获取下一行
-    public function FetchOne ( $Sql, $Where = array() ) {
-        $PDO = $this->Connect();
-        $PDOStatement = $PDO->prepare( $Sql );
-        if(!$PDOStatement){
-            $this->ErrorInfo = $PDO->errorInfo();
+    public function FetchOne ( $Sql ) {
+        $PDOStatement = $this->Query( $Sql );
+        if( !$PDOStatement ){
             return array();
+        }else{
+            return $PDOStatement->fetch( PDO::FETCH_ASSOC );
         }
-        $PDOStatement->execute( $Where );
-        return $PDOStatement->fetch(PDO::FETCH_ASSOC);
     }
 
     //返回一个包含结果集中所有行的数组
-    public function FetchAll ( $Sql, $Where = array() ) {
-        $PDO = $this->Connect();
-        $PDOStatement = $PDO->prepare( $Sql );
-        if(!$PDOStatement){
-            $this->ErrorInfo = $PDO->errorInfo();
+    public function FetchAll ( $Sql ) {
+        $PDOStatement = $this->Query( $Sql );
+        if( !$PDOStatement ){
             return array();
+        }else{
+            return $PDOStatement->fetchAll( PDO::FETCH_ASSOC ) ;
         }
-        $PDOStatement->execute( $Where );
-        return $PDOStatement->fetchAll( PDO::FETCH_ASSOC ) ;
     }
 
-    //写入一条数据
-    public function Add ( $Table, $Data = array() ) {
-        if ( empty($Data) ) {
+    //执行一条预处理语句
+    public function Execute  ( $Sql, $InputParam = array() ) {
+        $this->LastSql = $Sql;
+        $PDO = $this->Connect();
+        $PDOStatement = $PDO->prepare( $Sql );
+        if( !$PDOStatement ){
+            $this->ErrorInfo = $PDO->errorInfo();
+            return false;
+        }
+        if ( $PDOStatement->execute( $InputParam ) ) {
+            $this->LastInsertId = $PDO->lastInsertId();
+            return $PDOStatement;
+        }else{
+            $this->ErrorInfo=$PDOStatement->errorInfo();
+            return false;
+        }
+    }
+
+    //根据条件获取一条数据
+    public function GetOne ( $Table, $Expression /*[, $InputParam, $InputParam, ... ]*/ ) {
+        $Sql = "select * from {$Table} where $Expression limit 1";
+        $InputParam = $this->GetInputParam(func_get_args(),2);
+        $PDOStatement = $this->Execute ( $Sql , $InputParam );
+        if ( !$PDOStatement ) {
+            return array();
+        }else{
+            return $PDOStatement->fetch( PDO::FETCH_ASSOC );
+        }
+    }
+
+    //根据条件获取多条数据
+    public function GetAll ( $Table, $Expression /*[, $InputParam, $InputParam, ... ]*/ ) {
+        $Sql = "select * from {$Table} where $Expression ";
+        $InputParam = $this->GetInputParam(func_get_args(),2);
+        $PDOStatement = $this->Execute ( $Sql , $InputParam );
+        if ( !$PDOStatement ) {
+            return array();
+        }else{
+            return $PDOStatement->fetchAll( PDO::FETCH_ASSOC );
+        }
+    }
+
+    //写入数据
+    public function Add ( $Table, $Data ) {
+        if ( !is_array($Data) || empty($Data) ) {
             return false;
         }
         $Fields = '';
         $Values = '';
+        $InputParam = array();
         foreach ( $Data as $Key => $Val ) {
-            $Fields .= " `$Key`,";
-            $Values .= " :{$Key},";
+            $Fields .= " `$Key` ,";
+            $Values .= " ? ,";
+            $InputParam[] = $Val;
         }
         $Fields = rtrim( $Fields, ',' );
         $Values = rtrim( $Values, ',' );
         $Sql = "insert into `{$Table}` ({$Fields}) values ({$Values})";
-        $PDO = $this->Connect();
-        $PDOStatement = $PDO->prepare ( $Sql );
-        if(!$PDOStatement){
-            $this->ErrorInfo = $PDO->errorInfo();
-            return 0;
-        }
-        foreach ( $Data as $Key => $Val ) {
-            $PDOStatement->bindValue( ':'.$Key, $Val );
-        }
-        $PDOStatement->execute();
-        $this->ErrorInfo=$PDOStatement->errorInfo();
-        $this->LastInsertId = $PDO->lastInsertId();
-        if ( $PDOStatement->rowCount() > 0 ) {
-            return true;
-        }else{
+        $PDOStatement = $this->Execute ( $Sql , $InputParam );
+        if( !$PDOStatement ){
             return false;
+        }else{
+            if ( $PDOStatement->rowCount() > 0 ) {
+                return true;
+            }else{
+                $this->ErrorInfo = $PDOStatement->errorInfo();
+                return false;
+            }
         }
     }
 
-    //简单删除,只包含and条件
-    public function Del ( $Table, $Where = array (), $Limit = 1 ) {
-        if (empty($Where)) {
+    //删除
+    public function Del ( $Table, $Expression /*[, $InputParam, $InputParam, ... ]*/ ) {
+        $Sql = "delete from `{$Table}` where {$Expression}";
+        $InputParam = $this->GetInputParam(func_get_args(),2);
+        $PDOStatement = $this->Execute ( $Sql , $InputParam );
+        if ( !$PDOStatement ) {
             return 0;
-        }
-        $WhereArr = array();
-        foreach ( $Where as $Key => $Val ){
-            $WhereArr[]= "`{$Key}` = :{$Key}";
-        }
-        $WhereStr = implode (" and ",$WhereArr);
-        if ( is_numeric($Limit) && $Limit > 0 ) {
-            $LimitStr = " limit {$Limit}";
         }else{
-            $LimitStr = '';
+            return $PDOStatement->rowCount();
         }
-        $Sql = "delete from `{$Table}` where {$WhereStr} {$LimitStr}";
-        $PDO = $this->Connect();
-        $PDOStatement = $PDO->prepare ( $Sql );
-        if(!$PDOStatement){
-            $this->ErrorInfo = $PDO->errorInfo();
-            return 0;
-        }
-        foreach ( $Where as $Key => $Val ) {
-            $PDOStatement->bindValue( ':'.$Key, $Val );
-        }
-        $PDOStatement->execute();
-        $this->ErrorInfo=$PDOStatement->errorInfo();
-        return $PDOStatement->rowCount();
     }
 
-    //简单更新,只包含and条件
-    public function Update ( $Table, $Data = array (), $Where = array(), $Limit = 1) {
-        if ( empty($Data) || empty($Where) ) {
+    //更新
+    public function Update ( $Table, $Expression /*[, $InputParam, $InputParam, ... ]*/ ) {
+        $Sql = "update `{$Table}` set $Expression";
+        $InputParam = $this->GetInputParam(func_get_args(),2);
+        $PDOStatement = $this->Execute ( $Sql , $InputParam );
+        if ( !$PDOStatement ) {
             return 0;
-        }
-        $SetArr = array ();
-        foreach ($Data as $Key => $Val) {
-            $SetArr[] = " `{$Key}` = :Set_{$Key}";
-        }
-        $SetStr = implode (" , ",$SetArr);
-
-        $WhereArr = array();
-        foreach ( $Where as $Key => $Val ){
-            $WhereArr[]= "`{$Key}` = :Where_{$Key}";
-        }
-        $WhereStr = implode (" and ",$WhereArr);
-        if ( is_numeric($Limit) && $Limit > 0 ) {
-            $LimitStr = " limit {$Limit}";
         }else{
-            $LimitStr = '';
+            return $PDOStatement->rowCount();
         }
-        $Sql = "update `{$Table}` set {$SetStr} where {$WhereStr} $LimitStr";
-        $PDO = $this->Connect();
-        $PDOStatement = $PDO->prepare ( $Sql );
-        if(!$PDOStatement){
-            $this->ErrorInfo = $PDO->errorInfo();
-            return 0;
+    }
+
+    //获取参数
+    private function GetInputParam ( $Args, $Num ) {
+        for ( $i = 0; $i < $Num ; $i ++ ) {
+            unset($Args[$i]);
         }
-        foreach ( $Data as $Key => $Val ) {
-            $PDOStatement->bindValue( ':Set_'.$Key, $Val );
-        }
-        foreach ( $Where as $Key => $Val ) {
-            $PDOStatement->bindValue( ':Where_'.$Key, $Val );
-        }
-        $PDOStatement->execute();
-        $this->ErrorInfo=$PDOStatement->errorInfo();
-        return $PDOStatement->rowCount();
+        return array_values($Args);
     }
 
     public function LastError () {
@@ -184,6 +183,10 @@ class LiMySQL {
 
     public function LastInsertId () {
         return $this->LastInsertId;
+    }
+
+    public function LastSql () {
+        return $this->LastSql;
     }
     
     public function Help(){
