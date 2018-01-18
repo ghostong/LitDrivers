@@ -19,27 +19,31 @@ class LiRedis {
         $this->UserName = $UserName;
         $this->PassWord = $PassWord;
         $this->DbNum = $DbNum;
+        $this->DSNMd5 = md5( $Host.':'.$Port.':'.$UserName.':'.$PassWord.':'.$DbNum );
+        $this->Env = 'product';
     }
 
     //创建连接
     protected function Content () {
-        try {
-            $ConnObj = new Redis();
-            $ConnObj->pconnect( $this->Host, $this->Port );
-            if ( $this->UserName && $this->PassWord ) {
-                $ConnObj -> auth ( $this->UserName.':'.$this->PassWord );
+        $ConnObj = &self::$Instance[$this->DSNMd5];
+        if ( !isset( $ConnObj ) || !is_object( $ConnObj ) ) {
+            try {
+                $ConnObj = new Redis();
+                $ConnObj->pconnect( $this->Host, $this->Port );
+                if ( $this->UserName && $this->PassWord ) {
+                    $ConnObj -> auth ( $this->UserName.':'.$this->PassWord );
+                }
+                if ( $this->DbNum > 0 ){
+                    $ConnObj->select( $this->DbNum );
+                }
+            } catch ( RedisException $e ) {
+                if ( $this->Env == 'product' ) {
+                    die ('Redis connection failed');
+                }else{
+                    echo $e->getMessage();
+                }
             }
-            if ( $this->DbNum > 0 ){
-                $ConnObj->select( $this->DbNum );
-            }
-        } catch ( RedisException $e ) {
-            //根据业务逻辑自己定制逻辑
-            if ( true && false ) {
-                die ('Redis connection failed');
-            }else{
-                echo $e->getMessage();
-            }
-        } 
+        }
         return $ConnObj;
     }
 

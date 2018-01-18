@@ -27,11 +27,11 @@ $mysql = new limysql('127.0.0.1','3306','root','123456','cdn_log');
 
 $redis = new liRedis('192.168.0.231');
 
-//var_dump ( $redis->get ('aaaa') );
+var_dump ( $redis->get ('aaaa') );
 //$redis->set('aaaa','111');
 
 $mem = new liMemcached('192.168.0.230',11211);
 
-#var_dump($mem->get('aaa'));
+var_dump($mem->get('aaa'));
 
-#$mem->set('aaa','30',0);
+//$mem->set('aaa','30',0);
