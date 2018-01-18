@@ -31,7 +31,7 @@ class LiMemcached {
                 }
             } catch (Exception $e) {
                 if ( $this->Env == 'product' ) {
-                    die ('Redis connection failed');
+                    die ('Memcached connection failed');
                 }else{
                     echo $e->getMessage();
                 }
