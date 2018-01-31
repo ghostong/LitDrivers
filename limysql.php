@@ -41,7 +41,11 @@ class LiMySQL {
         return $ConnObj;
     }
 
-    //执行一条复杂语句
+    /**
+     * 执行一条复杂语句
+     * example:
+     * Query ('select * from `table` where `id` = 8 limit 1 ');
+     * */
     public function Query ( $Sql ) {
         $PDO = $this->Connect();
         $PDOStatement = $PDO->query($Sql);
@@ -54,7 +58,11 @@ class LiMySQL {
         }
     }
 
-    //从结果集中获取下一行
+    /**
+     * 从结果集中获取下一行
+     * example: 
+     * FetachOne ('select * from `table` where `id` = 8 limit 1 ');
+     * */
     public function FetchOne ( $Sql ) {
         $PDOStatement = $this->Query( $Sql );
         if( !$PDOStatement ){
@@ -64,7 +72,11 @@ class LiMySQL {
         }
     }
 
-    //返回一个包含结果集中所有行的数组
+    /**
+     * 返回一个包含结果集中所有行的数组
+     * example:
+     * FetchAll ('select * from `table` where `class_id` = 10');
+     * */
     public function FetchAll ( $Sql ) {
         $PDOStatement = $this->Query( $Sql );
         if( !$PDOStatement ){
@@ -74,7 +86,13 @@ class LiMySQL {
         }
     }
 
-    //执行一条预处理语句
+    /**
+     * 执行一条预处理语句
+     * example:
+     * Execute ( 'select * from `table` where `id` = ? limit ? ', array(8,1) ) ;
+     * Or
+     * Execute ( 'select * from `table` where `id` = :id limit 1 ', array('id'=>8) ) ;
+     * */
     public function Execute  ( $Sql, $InputParam = array() ) {
         $this->LastSql = $Sql;
         $PDO = $this->Connect();
@@ -92,7 +110,11 @@ class LiMySQL {
         }
     }
 
-    //根据条件获取一条数据
+    /**
+     * 根据条件获取一条数据
+     * example:
+     * GetOne ( 'table', 'id = ? and `class_id` = ?' , 8, 6 );
+     * */
     public function GetOne ( $Table, $Expression /*[, $InputParam, $InputParam, ... ]*/ ) {
         $Sql = "select * from {$Table} where $Expression limit 1";
         $InputParam = $this->GetInputParam(func_get_args(),2);
@@ -104,7 +126,11 @@ class LiMySQL {
         }
     }
 
-    //根据条件获取多条数据
+    /**
+     * 根据条件获取多条数据
+     * example:
+     * GetAll ( 'table', '`class_id` = ? ' , 6 );
+     * */
     public function GetAll ( $Table, $Expression /*[, $InputParam, $InputParam, ... ]*/ ) {
         $Sql = "select * from {$Table} where $Expression ";
         $InputParam = $this->GetInputParam(func_get_args(),2);
@@ -116,7 +142,12 @@ class LiMySQL {
         }
     }
 
-    //写入数据
+    /**
+     * 写入一条数据
+     * example: 
+     * Add ( 'table', array('name'=>'lucy','age'=>10) )
+     * Add ( 'table', array('name'=>'lily','age'=>10) )
+     * */
     public function Add ( $Table, $Data ) {
         if ( !is_array($Data) || empty($Data) ) {
             return false;
@@ -145,7 +176,11 @@ class LiMySQL {
         }
     }
 
-    //删除
+    /**
+     * 删除数据
+     * example:
+     * Del ( 'table' , 'id = ? or class_id = ?' , 7, 5 );
+     * */
     public function Del ( $Table, $Expression /*[, $InputParam, $InputParam, ... ]*/ ) {
         $Sql = "delete from `{$Table}` where {$Expression}";
         $InputParam = $this->GetInputParam(func_get_args(),2);
@@ -157,7 +192,11 @@ class LiMySQL {
         }
     }
 
-    //更新
+    /**
+     * 更新操作
+     * example:
+     * Update ( 'table', 'set `age` = `age` + 1 where `id` < ?', 10 )
+     * */
     public function Update ( $Table, $Expression /*[, $InputParam, $InputParam, ... ]*/ ) {
         $Sql = "update `{$Table}` set $Expression";
         $InputParam = $this->GetInputParam(func_get_args(),2);
@@ -190,7 +229,7 @@ class LiMySQL {
     }
     
     public function Help(){
-        Reflection::Export(new ReflectionClass(__CLASS__));
+        Reflection::Export( new ReflectionClass(__CLASS__) );
     }
 
     function __destruct () {

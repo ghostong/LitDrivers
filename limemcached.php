@@ -40,22 +40,26 @@ class LiMemcached {
         return $ConnObj;
     }
 
-    public function Key ( $Key ) {
-        return substr(md5($Key),0,16);
-    }
-
     public function Get ( $Key ) {
-        $Key = $this->Key( $Key );
         $Mem = $this->Connect();
         return $Mem->get( $Key );
     }
 
     public function Set ( $Key, $Val, $Ttl = 0 ) {
-        $Key = $this->Key( $Key );
         $Mem = $this->Connect();
         return $Mem->set ($Key,$Val,$Ttl);
     }
 
+    public function FetchAll ( $KeyArr ) {
+        $Mem = $this->Connect();
+        $Mem->getDelayed($KeyArr);
+        $Data = $Mem->fetchAll();
+        $Ret = array();
+        foreach ( $Data as $v ) {
+            $Ret[$v['key']] = $v['value'];
+        }
+        return $Ret;
+    }
 
     public function Help(){
         Reflection::Export(new ReflectionClass(__CLASS__));
