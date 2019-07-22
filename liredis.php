@@ -170,9 +170,9 @@ class LiRedis {
         return $Rds->smembers($Key);
     }
 
-    public function Srem ($key, $value) {
+    public function Srem ($Key, $value) {
         $Rds = $this->Connect();
-        return $Rds->srem($newKey, $value);
+        return $Rds->srem($Key, $value);
     }
 
     /**
@@ -237,6 +237,7 @@ class LiRedis {
     }
 
     public function RedisClose(){
+        $Rds = self::$Instance[$this->DSNMd5];
         if ( is_object($Rds) ){
             $Rds->close();
             unset ($Rds);
