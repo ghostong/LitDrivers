@@ -37,7 +37,7 @@ class LiRedis {
                 if ( $this->DbNum > 0 ){
                     $ConnObj->select( $this->DbNum );
                 }
-            } catch ( RedisException $e ) {
+            } catch ( Exception $e ) {
                 if ( $this->Env == 'product' ) {
                     die ('Redis connection failed');
                 }else{
