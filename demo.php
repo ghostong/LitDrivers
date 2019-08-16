@@ -2,7 +2,7 @@
 
 require(__DIR__.'/vendor/autoload.php');
 
-//Mysql 操作类测试
+//MySQL 操作类测试
 use  \lit\litool\limysql;
 
 //可连接多个数据库

@@ -1,25 +1,19 @@
 MySQL, Redis, Memcached 驱动封装. 用于提高易用性.
 
-
-
+### MySQL 操作类测试
 require(__DIR__.'/vendor/autoload.php');
-
-
-/**
- * 数据库操作类测试
- * */
-
+```php
 use  \lit\litool\limysql;
 
 //可连接多个数据库
 $mysql = new limysql('192.168.0.230','3306','root','123456','click') ;
-#$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
+//$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
 
 //获得帮助
-#$mysql->help();
+//$mysql->help();
 
 $mysql->FetchAll ("show variables like '%version%'") ;
-#$mysql2->FetchAll ("show variables like '%version%'") ;
+//$mysql2->FetchAll ("show variables like '%version%'") ;
 
 //从结果集中获取一行
 $mysql-> FetchOne ('select * from `user` where `id` = 1') ;
@@ -51,14 +45,19 @@ $mysql->LastSql() ;
 //获取最后的自增ID
 $mysql->LastInsertId() ;
 
-die ('MySQL test end !');
+//more ...
+```
 
+### Redis 操作类测试
 
+```php
+require(__DIR__.'/vendor/autoload.php');
 
 use  \lit\litool\redis;
 
 //可连接多个Redis
 $redis = new liRedis('192.168.0.231');
+$redis2 = new liRedis('192.168.0.232');
 
 //保存一条数据到Redis
 $redis->set('OneOfRedisKey', 'I love Redis', 3600);
@@ -70,16 +69,19 @@ $redis->Lpush('OneOfList','I love Redis');
 
 $redis->Rpop('OneOfList','I love Redis') ;
 
-#more ...
+//more ...
+```
 
-die ('Redis test end !');
 
-
+### Memcache 部分
+```php
+require(__DIR__.'/vendor/autoload.php');
 
 use  \lit\litool\memcache;
 
 //可连接多个Memcached 集群
 $mem = new liMemcached('192.168.0.230',11211);
+$mem2 = new liMemcached('192.168.0.231',11211);
 
 //从Memcached中获取一个值
 $mem->get('OneOfMemcacheKey');
@@ -89,4 +91,5 @@ $mem->set('OneOfMemcacheKey','30',0);
 
 $mem->FetchAll(['OneOfMemcacheKey','OneOfMemcacheKey1']) ;
 
-die ('Memcached test end !');
+//more ...
+```
