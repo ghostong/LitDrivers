@@ -4,7 +4,7 @@ MySQL, Redis, Memcached 驱动封装. 用于提高易用性.
 ```php
 require(__DIR__.'/vendor/autoload.php');
 
-use  \lit\litool\limysql;
+use \lit\drivers\LiMySQL;
 
 //可连接多个数据库
 $mysql = new limysql('192.168.0.230','3306','root','123456','click') ;
@@ -54,7 +54,7 @@ $mysql->LastInsertId() ;
 ```php
 require(__DIR__.'/vendor/autoload.php');
 
-use  \lit\litool\redis;
+use \lit\drivers\LiRedis;
 
 //可连接多个Redis
 $redis = new liRedis('192.168.0.231');
@@ -78,7 +78,7 @@ $redis->Rpop('OneOfList','I love Redis') ;
 ```php
 require(__DIR__.'/vendor/autoload.php');
 
-use  \lit\litool\memcache;
+use \lit\drivers\LiMemcached;
 
 //可连接多个Memcached 集群
 $mem = new liMemcached('192.168.0.230',11211);
