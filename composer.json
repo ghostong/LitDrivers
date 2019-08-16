@@ -1,5 +1,5 @@
 {
-  "name": "lit/driver",
+  "name": "lit/drivers",
   "description": "PHP 驱动封装",
   "authors": [
     {
@@ -8,7 +8,7 @@
     }
   ],
   "keywords": [
-    "driver",
+    "drivers",
     "mysql",
     "redis",
     "memcache"
@@ -20,7 +20,7 @@
   "autoload": {
     "files": [],
     "psr-4": {
-      "lit\\driver\\": "src"
+      "lit\\drivers\\": "src"
     }
   }
 }

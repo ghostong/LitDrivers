@@ -231,11 +231,15 @@ class LiMySQL {
     }
     
     public function Help(){
-        Reflection::Export( new ReflectionClass(__CLASS__) );
+        Reflection::Export( new \ReflectionClass(__CLASS__) );
     }
 
     function __destruct () {
     
+    }
+
+    public static function aa(){
+        echo "aaa";
     }
 
 }

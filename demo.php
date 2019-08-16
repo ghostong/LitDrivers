@@ -3,10 +3,15 @@
 require(__DIR__.'/vendor/autoload.php');
 
 //MySQL 操作类测试
-use \lit\drivers\LiMySQL;
+use \lit\drivers\limysql;
 
+try{
+    $mysql = new LiMySQL('192.168.0.230','3306','root','123456','click') ;
+
+}catch ( Exception $e ) {
+    var_dump($e->getTrace());
+}
 //可连接多个数据库
-$mysql = new limysql('192.168.0.230','3306','root','123456','click') ;
 //$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
 
 //获得帮助
