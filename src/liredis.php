@@ -31,7 +31,7 @@ class LiRedis {
         $ConnObj = &self::$Instance[$this->DSNMd5];
         if ( !isset( $ConnObj ) || !is_object( $ConnObj ) ) {
             try {
-                $ConnObj = new Redis();
+                $ConnObj = new \Redis();
                 $ConnObj->pconnect( $this->Host, $this->Port );
                 if ( $this->UserName && $this->PassWord ) {
                     $ConnObj -> auth ( $this->UserName.':'.$this->PassWord );
@@ -230,7 +230,7 @@ class LiRedis {
 
     public function multi (){
         $Rds = $this->Connect();
-        return $Rds->multi(Redis::PIPELINE);
+        return $Rds->multi(\Redis::PIPELINE);
     }
 
     public function exec (){
@@ -272,7 +272,7 @@ class LiRedis {
     }
 
     public function Help(){
-        Reflection::Export( new ReflectionClass(__CLASS__) );
+        \Reflection::Export( new \ReflectionClass(__CLASS__) );
     }
     
     function __destruct () {

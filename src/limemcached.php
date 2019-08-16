@@ -25,7 +25,7 @@ class LiMemcached {
         $ConnObj = &self::$Instance[$this->DSNMd5];
         if ( !isset( $ConnObj ) || !is_object( $ConnObj ) ) {
             try {
-                $ConnObj = new Memcached();
+                $ConnObj = new \Memcached();
                 if ( !empty($this->Servers) ) {
                     $ConnObj->addServers( $this->Servers );
                 }else{
@@ -64,7 +64,7 @@ class LiMemcached {
     }
 
     public function Help(){
-        Reflection::Export(new ReflectionClass(__CLASS__));
+        \Reflection::Export(new \ReflectionClass(__CLASS__));
     }
 
 }

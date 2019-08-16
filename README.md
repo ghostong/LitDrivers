@@ -14,7 +14,7 @@ $mysql = new limysql('192.168.0.230','3306','root','123456','click') ;
 $mysql->help();
 
 $mysql->FetchAll ("show variables like '%version%'") ;
-$mysql2->FetchAll ("show variables like '%version%'") ;
+//$mysql2->FetchAll ("show variables like '%version%'") ;
 
 //从结果集中获取一行
 $mysql-> FetchOne ('select * from `user` where `id` = 1') ;

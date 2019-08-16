@@ -30,9 +30,9 @@ class LiMySQL {
         $ConnObj = &self::$Instance[$this->DSNMd5];
         if ( !isset( $ConnObj ) || !is_object( $ConnObj ) ) {
             try {
-                $ConnObj = new PDO ( $this->DSN, $this->UserName, $this->PassWord );
-                $ConnObj->setAttribute(PDO::ATTR_EMULATE_PREPARES,false);
-            } catch ( PDOException $e ) {
+                $ConnObj = new \PDO ( $this->DSN, $this->UserName, $this->PassWord );
+                $ConnObj->setAttribute(\PDO::ATTR_EMULATE_PREPARES,false);
+            } catch ( \PDOException $e ) {
                 if ( $this->Env == 'product' ) {
                     die ('Database connection failed');
                 }else{
@@ -70,7 +70,7 @@ class LiMySQL {
         if( !$PDOStatement ){
             return array();
         }else{
-            return $PDOStatement->fetch( PDO::FETCH_ASSOC );
+            return $PDOStatement->fetch( \PDO::FETCH_ASSOC );
         }
     }
 
@@ -84,7 +84,7 @@ class LiMySQL {
         if( !$PDOStatement ){
             return array();
         }else{
-            return $PDOStatement->fetchAll( PDO::FETCH_ASSOC ) ;
+            return $PDOStatement->fetchAll( \PDO::FETCH_ASSOC ) ;
         }
     }
 
@@ -124,7 +124,7 @@ class LiMySQL {
         if ( !$PDOStatement ) {
             return array();
         }else{
-            return $PDOStatement->fetch( PDO::FETCH_ASSOC );
+            return $PDOStatement->fetch( \PDO::FETCH_ASSOC );
         }
     }
 
@@ -140,7 +140,7 @@ class LiMySQL {
         if ( !$PDOStatement ) {
             return array();
         }else{
-            return $PDOStatement->fetchAll( PDO::FETCH_ASSOC );
+            return $PDOStatement->fetchAll( \PDO::FETCH_ASSOC );
         }
     }
 
@@ -231,7 +231,7 @@ class LiMySQL {
     }
     
     public function Help(){
-        Reflection::Export( new \ReflectionClass(__CLASS__) );
+        \Reflection::Export( new \ReflectionClass(__CLASS__) );
     }
 
     function __destruct () {
