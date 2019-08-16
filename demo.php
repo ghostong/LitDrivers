@@ -10,7 +10,7 @@ $mysql = new limysql('192.168.0.230','3306','root','123456','click') ;
 //$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
 
 //获得帮助
-//$mysql->help();
+$mysql->help();
 
 $mysql->FetchAll ("show variables like '%version%'") ;
 //$mysql2->FetchAll ("show variables like '%version%'") ;
