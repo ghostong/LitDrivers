@@ -1,0 +1,26 @@
+{
+  "name": "lit/driver",
+  "description": "PHP 驱动封装",
+  "authors": [
+    {
+      "name": "litong",
+      "email": "ghostong@126.com"
+    }
+  ],
+  "keywords": [
+    "driver",
+    "mysql",
+    "redis",
+    "memcache"
+  ],
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "minimum-stability": "dev",
+  "autoload": {
+    "files": [],
+    "psr-4": {
+      "lit\\driver\\": "src"
+    }
+  }
+}

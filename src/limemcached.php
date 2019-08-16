@@ -4,6 +4,8 @@
  * Memcached 操作类
  * */
 
+namespace lit\drivers;
+
 class LiMemcached {
     protected $Host;
     protected $Port;

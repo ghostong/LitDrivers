@@ -1,31 +1,19 @@
 <?php
 
-error_reporting(E_ALL & ~E_NOTICE);
-ini_set ('display_errors','on');
-header("Content-type: text/html; charset=utf-8");
+require(__DIR__.'/vendor/autoload.php');
 
-include (__DIR__.'/limysql.php');
-include (__DIR__.'/liredis.php');
-include (__DIR__.'/limemcached.php');
-
-#goto mysql;
-#goto redis;
-#goto memcache;
-
-mysql:
-/**
- * 数据库操作类测试
- * */
+//Mysql 操作类测试
+use  \lit\litool\limysql;
 
 //可连接多个数据库
 $mysql = new limysql('192.168.0.230','3306','root','123456','click') ;
-#$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
+//$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
 
 //获得帮助
-#$mysql->help();
+//$mysql->help();
 
 $mysql->FetchAll ("show variables like '%version%'") ;
-#$mysql2->FetchAll ("show variables like '%version%'") ;
+//$mysql2->FetchAll ("show variables like '%version%'") ;
 
 //从结果集中获取一行
 $mysql-> FetchOne ('select * from `user` where `id` = 1') ;
@@ -57,12 +45,15 @@ $mysql->LastSql() ;
 //获取最后的自增ID
 $mysql->LastInsertId() ;
 
-die ('MySQL test end !');
+//more ...
 
 
-redis:
+//Redis 操作类测试
+use  \lit\litool\redis;
+
 //可连接多个Redis
 $redis = new liRedis('192.168.0.231');
+$redis2 = new liRedis('192.168.0.232');
 
 //保存一条数据到Redis
 $redis->set('OneOfRedisKey', 'I love Redis', 3600);
@@ -74,14 +65,16 @@ $redis->Lpush('OneOfList','I love Redis');
 
 $redis->Rpop('OneOfList','I love Redis') ;
 
-#more ...
-
-die ('Redis test end !');
+//more ...
 
 
-memcache:
+
+//Memcache 部分
+use  \lit\litool\memcache;
+
 //可连接多个Memcached 集群
 $mem = new liMemcached('192.168.0.230',11211);
+$mem2 = new liMemcached('192.168.0.231',11211);
 
 //从Memcached中获取一个值
 $mem->get('OneOfMemcacheKey');
@@ -91,4 +84,4 @@ $mem->set('OneOfMemcacheKey','30',0);
 
 $mem->FetchAll(['OneOfMemcacheKey','OneOfMemcacheKey1']) ;
 
-die ('Memcached test end !');
+//more ...

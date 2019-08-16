@@ -4,6 +4,8 @@
  * MySQL数据库操作类
  * */
 
+namespace lit\drivers;
+
 class LiMySQL {
 
     protected $DSN;

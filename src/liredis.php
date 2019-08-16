@@ -4,6 +4,8 @@
  * Redis 操作类
  * */
 
+namespace lit\drivers;
+
 class LiRedis {
 
     protected $Host;
