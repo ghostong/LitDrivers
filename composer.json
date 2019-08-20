@@ -20,7 +20,7 @@
   "autoload": {
     "files": [],
     "psr-4": {
-      "lit\\drivers\\": "src"
+      "Lit\\Drivers\\": "src"
     }
   }
 }

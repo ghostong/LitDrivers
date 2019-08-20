@@ -4,22 +4,22 @@ MySQL, Redis, Memcached 驱动封装. 用于提高易用性.
 ```php
 require(__DIR__.'/vendor/autoload.php');
 
-use \lit\drivers\LiMySQL;
+use \Lit\Drivers\LiMySQL;
 
 //可连接多个数据库
 $mysql = new limysql('192.168.0.230','3306','root','123456','click') ;
-//$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
+$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
 
 //获得帮助
 $mysql->help();
 
 $mysql->FetchAll ("show variables like '%version%'") ;
-//$mysql2->FetchAll ("show variables like '%version%'") ;
+$mysql2->FetchAll ("show variables like '%version%'") ;
 
 //从结果集中获取一行
 $mysql-> FetchOne ('select * from `user` where `id` = 1') ;
 
-//获取包含结果集中所有行的数组
+获取包含结果集中所有行的数组
 $mysql-> FetchAll ('select * from `user` limit 10') ;
 
 //根据条件获取一条数据
@@ -54,7 +54,7 @@ $mysql->LastInsertId() ;
 ```php
 require(__DIR__.'/vendor/autoload.php');
 
-use \lit\drivers\LiRedis;
+use \Lit\Drivers\LiRedis;
 
 //可连接多个Redis
 $redis = new liRedis('192.168.0.231');
@@ -78,7 +78,7 @@ $redis->Rpop('OneOfList','I love Redis') ;
 ```php
 require(__DIR__.'/vendor/autoload.php');
 
-use \lit\drivers\LiMemcached;
+use \Lit\Drivers\LiMemcached;
 
 //可连接多个Memcached 集群
 $mem = new liMemcached('192.168.0.230',11211);

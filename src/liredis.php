@@ -4,7 +4,7 @@
  * Redis 操作类
  * */
 
-namespace lit\drivers;
+namespace Lit\Drivers;
 
 class LiRedis {
 

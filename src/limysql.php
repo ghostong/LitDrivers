@@ -4,7 +4,7 @@
  * MySQL数据库操作类
  * */
 
-namespace lit\drivers;
+namespace Lit\Drivers;
 
 class LiMySQL {
 
