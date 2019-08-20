@@ -7,8 +7,8 @@ require(__DIR__.'/vendor/autoload.php');
 use \Lit\Drivers\LiMySQL;
 
 //可连接多个数据库
-$mysql = new limysql('192.168.0.230','3306','root','123456','click') ;
-$mysql2 = new limysql('192.168.0.244','3306','root','123456','dbname') ;
+$mysql = new LiMySQL('192.168.0.230','3306','root','123456','click') ;
+$mysql2 = new LiMySQL('192.168.0.244','3306','root','123456','dbname') ;
 
 //获得帮助
 $mysql->help();
@@ -57,8 +57,8 @@ require(__DIR__.'/vendor/autoload.php');
 use \Lit\Drivers\LiRedis;
 
 //可连接多个Redis
-$redis = new liRedis('192.168.0.231');
-$redis2 = new liRedis('192.168.0.232');
+$redis = new LiRedis('192.168.0.231');
+$redis2 = new LiRedis('192.168.0.232');
 
 //保存一条数据到Redis
 $redis->set('OneOfRedisKey', 'I love Redis', 3600);
@@ -81,8 +81,8 @@ require(__DIR__.'/vendor/autoload.php');
 use \Lit\Drivers\LiMemcached;
 
 //可连接多个Memcached 集群
-$mem = new liMemcached('192.168.0.230',11211);
-$mem2 = new liMemcached('192.168.0.231',11211);
+$mem = new LiMemcached('192.168.0.230',11211);
+$mem2 = new LiMemcached('192.168.0.231',11211);
 
 //从Memcached中获取一个值
 $mem->get('OneOfMemcacheKey');
