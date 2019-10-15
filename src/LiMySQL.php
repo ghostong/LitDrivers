@@ -15,6 +15,7 @@ class LiMySQL {
     protected $ErrorInfo;
     protected $LastInsertId = 0;
     protected $LastSql='';
+    protected $Env;
     private static $Instance = array();
 
     function __construct ( $Host='127.0.0.1', $Port='3306', $UserName='', $PassWord='', $DBName='', $Charset='utf8' ) {
