@@ -9,14 +9,19 @@ namespace Lit\Drivers;
 class LiMemcached {
     protected $Host;
     protected $Port;
+    protected $UserName;
+    protected $PassWord;
     protected $Servers;
     protected $DSNMd5;
+    protected $Env;
     private static $Instance = array ();
-    function __construct ( $Host='127.0.0.1', $Port='11211', $Servers = array() ) {
+    function __construct ( $Host='127.0.0.1', $Port='11211', $UserName='', $PassWord='', $Servers = array() ) {
         $this->Host = $Host;
         $this->Port = $Port;
+        $this->UserName = $UserName;
+        $this->PassWord = $PassWord;
         $this->Servers = $Servers;
-        $this->DSNMd5 = md5( $Host.':'.$Port.':'.serialize ($Servers) );
+        $this->DSNMd5 = md5( $Host.':'.$Port.':'.$UserName.':'.$PassWord.":".serialize ($Servers) );
         $this->Env = 'product';
     }
 
@@ -26,10 +31,15 @@ class LiMemcached {
         if ( !isset( $ConnObj ) || !is_object( $ConnObj ) ) {
             try {
                 $ConnObj = new \Memcached();
+                $ConnObj->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
+                $ConnObj->setOption(\Memcached::OPT_TCP_NODELAY, true); //php memcached有个bug,get不存在,有固定40ms延迟，开启此参数可以避免
                 if ( !empty($this->Servers) ) {
                     $ConnObj->addServers( $this->Servers );
                 }else{
                     $ConnObj->addServer( $this->Host, $this->Port );
+                }
+                if ($this->UserName && $this->PassWord) {
+                    $ConnObj->setSaslAuthData($this->UserName,$this->PassWord);
                 }
             } catch (Exception $e) {
                 if ( $this->Env == 'product' ) {
@@ -39,6 +49,7 @@ class LiMemcached {
                 }
             }
         }
+        1;
         return $ConnObj;
     }
 
