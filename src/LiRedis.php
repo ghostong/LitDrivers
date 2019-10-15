@@ -10,19 +10,20 @@ class LiRedis {
 
     protected $Host;
     protected $Port;
-    protected $UserName;
+    protected $Auth;
     protected $PassWord;
     protected $DbNum;
     protected $LastKey;
+    protected $DSNMd5;
+    protected $Env;
     private static $Instance = array ();
 
-    function __construct ( $Host = '127.0.0.1', $Port = 6379, $UserName = '', $PassWord = '', $DbNum = 0) {
+    function __construct ( $Host = '127.0.0.1', $Port = 6379, $Auth = '', $DbNum = 0) {
         $this->Host = $Host;
         $this->Port = $Port;
-        $this->UserName = $UserName;
-        $this->PassWord = $PassWord;
+        $this->Auth = $Auth;
         $this->DbNum = $DbNum;
-        $this->DSNMd5 = md5( $Host.':'.$Port.':'.$UserName.':'.$PassWord.':'.$DbNum );
+        $this->DSNMd5 = md5( $Host.':'.$Port.':'.$Auth.':'.$DbNum );
         $this->Env = 'product';
     }
 
@@ -33,8 +34,8 @@ class LiRedis {
             try {
                 $ConnObj = new \Redis();
                 $ConnObj->pconnect( $this->Host, $this->Port );
-                if ( $this->UserName && $this->PassWord ) {
-                    $ConnObj -> auth ( $this->UserName.':'.$this->PassWord );
+                if ( $this->Auth ) {
+                    $ConnObj -> auth ( $this->Auth );
                 }
                 if ( $this->DbNum > 0 ){
                     $ConnObj->select( $this->DbNum );
