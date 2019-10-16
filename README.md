@@ -94,3 +94,9 @@ $mem->FetchAll(['OneOfMemcacheKey','OneOfMemcacheKey1']) ;
 
 //more ...
 ```
+
+###附录
+Ubuntu安装memcached依赖
+````bash
+apt-get install -y zlib1g-dev libmemcached11 libmemcached-dev libmemcachedutil2
+````
