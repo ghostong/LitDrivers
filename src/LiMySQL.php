@@ -25,6 +25,11 @@ class LiMySQL {
         $this->PassWord = $PassWord;
         $this->Env = 'product';
     }
+
+    //设置运行环境
+    public function SetEnv ( $env ) {
+        $this->Env = $env;
+    }
     
     //创建连接
     protected function Connect () {
@@ -35,10 +40,11 @@ class LiMySQL {
                 $ConnObj->setAttribute(\PDO::ATTR_EMULATE_PREPARES,false);
             } catch ( \PDOException $e ) {
                 if ( $this->Env == 'product' ) {
-                    die ('Database connection failed');
+                    echo 'Database connection failed';
                 }else{
                     echo $e->getMessage();
                 }
+                return false;
             }
         }
         return $ConnObj;
@@ -237,10 +243,6 @@ class LiMySQL {
 
     function __destruct () {
     
-    }
-
-    public static function aa(){
-        echo "aaa";
     }
 
 }
