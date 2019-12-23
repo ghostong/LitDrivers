@@ -15,7 +15,6 @@ class LiMySQL {
     protected $ErrorInfo;
     protected $LastInsertId = 0;
     protected $LastSql='';
-    protected $Env;
     private static $Instance = array();
 
     function __construct ( $Host='127.0.0.1', $Port='3306', $UserName='', $PassWord='', $DBName='', $Charset='utf8' ) {
@@ -23,12 +22,6 @@ class LiMySQL {
         $this->DSNMd5 = md5 ($this->DSN );
         $this->UserName = $UserName;
         $this->PassWord = $PassWord;
-        $this->Env = 'product';
-    }
-
-    //设置运行环境
-    public function SetEnv ( $env ) {
-        $this->Env = $env;
     }
     
     //创建连接
@@ -39,12 +32,8 @@ class LiMySQL {
                 $ConnObj = new \PDO ( $this->DSN, $this->UserName, $this->PassWord );
                 $ConnObj->setAttribute(\PDO::ATTR_EMULATE_PREPARES,false);
             } catch ( \PDOException $e ) {
-                if ( $this->Env == 'product' ) {
-                    echo 'Database connection failed';
-                }else{
-                    echo $e->getMessage();
-                }
-                return false;
+                $this->ErrorInfo = $e->getMessage();
+                return $this;
             }
         }
         return $ConnObj;
