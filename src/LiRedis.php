@@ -215,6 +215,11 @@ class LiRedis {
         $redisClient = $this->connect();
         return $redisClient->zRevRangeByScore( $key, $start, $end,  $options );
     }
+
+    public function zRangeByScore( $key, $start, $end, $options = array() ) {
+        $redisClient = $this->connect();
+        return $redisClient->zRangeByScore( $key, $start, $end,  $options );
+    }
     
     
     // 订阅部分
