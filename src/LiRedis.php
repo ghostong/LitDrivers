@@ -235,16 +235,24 @@ class LiRedis {
     }
 
 
-    //其他部分
+    //批量操作
 
-    public function rename($oldName , $newName){
+    public function mGet( $keys = array()){
         $redisClient = $this->connect();
-        return $redisClient->rename($oldName,$newName);
+        return $redisClient->mget($keys);
     }
 
     public function multi (){
         $redisClient = $this->connect();
         return $redisClient->multi(\Redis::PIPELINE);
+    }
+
+
+    //其他部分
+
+    public function rename($oldName , $newName){
+        $redisClient = $this->connect();
+        return $redisClient->rename($oldName,$newName);
     }
 
     public function exec (){
