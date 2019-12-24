@@ -8,272 +8,287 @@ namespace Lit\Drivers;
 
 class LiRedis {
 
-    protected $Host;
-    protected $Port;
-    protected $Auth;
-    protected $PassWord;
-    protected $DbNum;
-    protected $LastKey;
-    protected $DSNMd5;
-    protected $Env;
-    private static $Instance = array ();
+    protected $host;
+    protected $port;
+    protected $auth;
+    protected $passWord;
+    protected $dbNum;
+    protected $lastKey;
+    protected $dsnMd5;
+    protected $env;
+    private static $instance = array ();
 
-    function __construct ( $Host = '127.0.0.1', $Port = 6379, $Auth = '', $DbNum = 0) {
-        $this->Host = $Host;
-        $this->Port = $Port;
-        $this->Auth = $Auth;
-        $this->DbNum = $DbNum;
-        $this->DSNMd5 = md5( $Host.':'.$Port.':'.$Auth.':'.$DbNum );
-        $this->Env = 'product';
+    function __construct ( $host = '127.0.0.1', $port = 6379, $auth = '', $dbNum = 0) {
+        $this->host = $host;
+        $this->port = $port;
+        $this->auth = $auth;
+        $this->dbNum = $dbNum;
+        $this->dsnMd5 = md5( $host.':'.$port.':'.$auth.':'.$dbNum );
+        $this->env = 'product';
+    }
+
+    //设置运行环境
+    public function setEnv ( $env ) {
+        $this->env = $env;
     }
 
     //创建连接
-    protected function Connect () {
-        $ConnObj = &self::$Instance[$this->DSNMd5];
-        if ( !isset( $ConnObj ) || !is_object( $ConnObj ) ) {
+    protected function connect () {
+        $redisObject = &self::$instance[$this->dsnMd5];
+        if ( !isset( $redisObject ) || !is_object( $redisObject ) ) {
             try {
-                $ConnObj = new \Redis();
-                $ConnObj->pconnect( $this->Host, $this->Port );
-                if ( $this->Auth ) {
-                    $ConnObj -> auth ( $this->Auth );
+                $redisObject = new \Redis();
+                $redisObject->pconnect( $this->host, $this->port );
+                if ( $this->auth ) {
+                    $redisObject -> auth ( $this->auth );
                 }
-                if ( $this->DbNum > 0 ){
-                    $ConnObj->select( $this->DbNum );
+                if ( $this->dbNum > 0 ){
+                    $redisObject->select( $this->dbNum );
                 }
-            } catch ( Exception $e ) {
-                if ( $this->Env == 'product' ) {
+            } catch ( \Exception $e ) {
+                if ( $this->env == 'product' ) {
                     die ('Redis connection failed');
                 }else{
-                    echo $e->getMessage();
+                    die ( $e->getMessage() );
                 }
             }
         }
-        return $ConnObj;
+        return $redisObject;
     }
 
-    /**
-     * string 部分
-     * */
-    public function Get ( $Key ) {
-        $Rds = $this->Connect();
-        return $Rds->get ( $Key );
+
+    // string 部分
+
+    public function get ( $key ) {
+        $redisClient = $this->connect();
+        return $redisClient->get ( $key );
     }
 
-    public function Set ( $Key, $Val, $Seconds = 0 ) {
-        $Rds = $this->Connect();
+    public function set ( $key, $val, $Seconds = 0 ) {
+        $redisClient = $this->connect();
         if ( $Seconds > 0 ) {
-            return $Rds->set ( $Key, $Val, $Seconds );
+            return $redisClient->set ( $key, $val, $Seconds );
         }else{
-            return $Rds->set ( $Key, $Val );
+            return $redisClient->set ( $key, $val );
         }
     }
 
-    public function Del($Key) {
-        $Rds = $this->Connect();
-        return $Rds->del($Key);
+    public function del($key) {
+        $redisClient = $this->connect();
+        return $redisClient->del($key);
     }
     
-    public function Keys ($Filed){
-        $Rds = $this->Connect();
-        return $Rds->keys($Filed);
+    public function keys ($Filed){
+        $redisClient = $this->connect();
+        return $redisClient->keys($Filed);
     }
 
-    public function Exists ($Filed) {
-        $Rds = $this->Connect();
-        return $Rds->exists($Filed);
+    public function exists ($Filed) {
+        $redisClient = $this->connect();
+        return $redisClient->exists($Filed);
     }
 
-    /**
-     * List部分
-     * */
-    public function Lpush($Key , $str = ''){
-        $Rds = $this->Connect();
-        return $Rds->lpush($Key,$str);
+
+    // List部分
+
+    public function lPush($key , $str = ''){
+        $redisClient = $this->connect();
+        return $redisClient->lPush($key,$str);
     }
     
-    public function Rpush($Key , $str = ''){
-        $Rds = $this->Connect();
-        return $Rds->rpush($Key,$str);
+    public function rPush($key , $str = ''){
+        $redisClient = $this->connect();
+        return $redisClient->rPush($key,$str);
     }
 
-    public function Rpop($Key){
-        $Rds = $this->Connect();
-        return $Rds->Rpop($Key);
+    public function rPop($key){
+        $redisClient = $this->connect();
+        return $redisClient->rPop($key);
     }
 
-    public function Lpop($Key){
-        $Rds = $this->Connect();
-        return $Rds->Lpop($Key);
+    public function lPop($key){
+        $redisClient = $this->connect();
+        return $redisClient->lPop($key);
     }
 
-    public function Llen($Key){
-        $Rds = $this->Connect();
-        return $Rds->Llen($Key);
+    public function lLen($key){
+        $redisClient = $this->connect();
+        return $redisClient->lLen($key);
     }
     
-    public function LRange($Key,$Start,$End){
-        $Rds = $this->Connect();
-        return $Rds->lRange($Key,$Start,$End);
+    public function lRange($key,$Start,$End){
+        $redisClient = $this->connect();
+        return $redisClient->lRange($key,$Start,$End);
     }
     
-    public function LRem($Key,$Start,$End){
-        $Rds = $this->Connect();
-        return $Rds->lRem($Key,$Start,$End);
+    public function lRem($key,$Start,$End){
+        $redisClient = $this->connect();
+        return $redisClient->lRem($key,$Start,$End);
     }
     
-    public function LTrim($Key,$Start,$End){
-        $Rds = $this->Connect();
-        return $Rds->lTrim($Key,$Start,$End);
+    public function lTrim($key,$Start,$End){
+        $redisClient = $this->connect();
+        return $redisClient->lTrim($key,$Start,$End);
     }
 
-    /**
-     * hashes 部分
-     * */
-    public function Hset($Key,$Filed,$Value){
-        $Rds = $this->Connect();
-        return $Rds->Hset($Key,$Filed,$Value);
+
+    // hashes 部分
+
+    public function hSet($key,$Filed,$value){
+        $redisClient = $this->connect();
+        return $redisClient->hSet($key,$Filed,$value);
     }
 
-    public function Hget($Key,$Filed){
-        $Rds = $this->Connect();
-        return $Rds->Hget($Key,$Filed);
+    public function hGet($key,$Filed){
+        $redisClient = $this->connect();
+        return $redisClient->hGet($key,$Filed);
     }
 
-    public function HgetAll($Key){
-        $Rds = $this->Connect();
-        return $Rds->HgetAll($Key);
+    public function hGetAll($key){
+        $redisClient = $this->connect();
+        return $redisClient->hGetAll($key);
     
     }
 
-    public function Hlen($Key){
-        $Rds = $this->Connect();
-        return $Rds->hlen($Key);
+    public function hLen($key){
+        $redisClient = $this->connect();
+        return $redisClient->hLen($key);
     }
 
-    public function Hdel($Key,$Field){
-        $Rds = $this->Connect();
-        return $Rds->hdel($Key,$Field);
+    public function hDel($key,$field){
+        $redisClient = $this->connect();
+        return $redisClient->hDel($key,$field);
     }
 
-    public function Hexists($Key,$Field){
-        $Rds = $this->Connect();
-        return $Rds->hExists($Key,$Field);
+    public function hExists($key,$field){
+        $redisClient = $this->connect();
+        return $redisClient->hExists($key,$field);
     }
 
-    /**
-     * set 类型
-     * */
-    public function Sadd ($Key,$Field) {
-        $Rds = $this->Connect();
-        return $Rds->sadd($Key,$Field);
+
+    // set 类型
+
+    public function sAdd ($key,$field) {
+        $redisClient = $this->connect();
+        return $redisClient->sAdd($key,$field);
     }
 
-    public function Smembers ($Key) {
-        $Rds = $this->Connect();
-        return $Rds->smembers($Key);
+    public function sMembers ($key) {
+        $redisClient = $this->connect();
+        return $redisClient->sMembers($key);
     }
 
-    public function Srem ($Key, $value) {
-        $Rds = $this->Connect();
-        return $Rds->srem($Key, $value);
+    public function sRem ($key, $value) {
+        $redisClient = $this->connect();
+        return $redisClient->sRem($key, $value);
     }
 
-    /**
-     * 有序集合部分
-     * */
-    public function Zadd ( $Key,$Score,$Member ){
-        $Rds = $this->Connect();
-        return $Rds->Zadd($Key,$Score,$Member);
+
+     // 有序集合部分
+    
+    public function zAdd ( $key, $score, $member ){
+        $redisClient = $this->connect();
+        return $redisClient->zAdd($key,$score,$member);
     }
     
-    public function Zcard  ( $Key ){
-        $Rds = $this->Connect();
-        return $Rds->Zcard ($Key);
+    public function zCard  ( $key ){
+        $redisClient = $this->connect();
+        return $redisClient->zCard ($key);
     }
 
-    public function Zrevrange ($Key, $Start = 0,$End = 10) {
-        $Rds = $this->Connect();
-        return $Rds->zrevrange($Key,$Start,$End);
+    public function zRevRange ($key, $Start = 0,$End = 10) {
+        $redisClient = $this->connect();
+        return $redisClient->zRevRange($key,$Start,$End);
     }
     
-    public function Zrange ($Key, $Start = 0,$End = 10) {
-        $Rds = $this->Connect();
-        return $Rds->zrange($Key,$Start,$End);
+    public function zRange ($key, $Start = 0,$End = 10) {
+        $redisClient = $this->connect();
+        return $redisClient->zRange( $key, $Start, $End );
     }
 
-    public function Zremrangebyrank  ($Key, $Start = 0,$End = 10) {
-        $Rds = $this->Connect();
-        return $Rds->zremrangebyrank($Key,$Start,$End);
+    public function zRemRangeByRank ( $key, $Start = 0,$End = 10 ) {
+        $redisClient = $this->connect();
+        return $redisClient->zRemRangeByRank($key,$Start,$End);
     }
 
-    /**
-     * 订阅部分
-     * */
-    public function Subscribe ($Channel,$Callback){
-        $Rds = $this->Connect();
-        return $Rds->subscribe($Channel,$Callback);
+    public function zRevRangeByScore( $key, $start, $end, $options = array() ) {
+        $redisClient = $this->connect();
+        return $redisClient->zRevRangeByScore( $key, $start, $end,  $options );
+    }
+    
+    
+    // 订阅部分
+    
+    public function subscribe ($Channel,$Callback){
+        $redisClient = $this->connect();
+        return $redisClient->subscribe($Channel,$Callback);
     }
 
-    public function Publish ($Channel,$Val){
-        $Rds = $this->Connect();
-        return $Rds->publish($Channel,$Val);
+    public function publish ($Channel,$val){
+        $redisClient = $this->connect();
+        return $redisClient->publish($Channel,$val);
     }
 
-    public function getLastError (){
-        $Rds = $this->Connect();
-        return $Rds->getLastError();
-    }
 
-    public function Rename($oldName , $newName){ 
-        $Rds = $this->Connect();
-        return $Rds->rename($oldName,$newName);
+    //其他部分
+
+    public function rename($oldName , $newName){
+        $redisClient = $this->connect();
+        return $redisClient->rename($oldName,$newName);
     }
 
     public function multi (){
-        $Rds = $this->Connect();
-        return $Rds->multi(\Redis::PIPELINE);
+        $redisClient = $this->connect();
+        return $redisClient->multi(\Redis::PIPELINE);
     }
 
     public function exec (){
-        $Rds = $this->Connect();
-        $Rds->exec();
+        $redisClient = $this->connect();
+        $redisClient->exec();
     }
 
-    public function RedisClose(){
-        $Rds = self::$Instance[$this->DSNMd5];
-        if ( is_object($Rds) ){
-            $Rds->close();
-            unset ($Rds);
+    public function redisClose(){
+        $redisClient = self::$instance[$this->dsnMd5];
+        if ( is_object($redisClient) ){
+            $redisClient->close();
+            unset ($redisClient);
         }
     }
     
-    public function Expire($Key,$Seconds = 0){
-        $Rds = $this->Connect();
-    	return $Rds->expire($Key,$Seconds);
+    public function expire($key,$Seconds = 0){
+        $redisClient = $this->connect();
+    	return $redisClient->expire($key,$Seconds);
+    }
+
+    public function getLastError (){
+        $redisClient = $this->connect();
+        return $redisClient->getLastError();
     }
     
+    //redis扩展功能
     /**
      * 计数器
-     * $Key 键
-     * $ac  + 加1;- 减1;0 重置;Null(或留空)获取计数器的值
+     * @param $key 键
+     * @param $ac  + 加1;- 减1;0 重置;Null(或留空)获取计数器的值
+     * @return int
      * */
-    public function Counter ( $Key , $ac = Null) {
-        $Rds = $this->Connect();
+    public function counter ( $key , $ac = null) {
+        $redisClient = $this->connect();
         if($ac === '+') {
-            return $Rds->incr($Key);
+            return $redisClient->incr($key);
         }elseif ($ac === '-') {
-            return $Rds->decr($Key);
+            return $redisClient->decr($key);
         }elseif ($ac == '0') {
-            return $this->Set($Key,0);
+            return $this->Set($key,0);
         }elseif ($ac === Null) {
-            return $this->Get($Key);
+            return $this->Get($key);
         }else{
-            return false;
+            return 0;
         }
     }
 
     public function Help(){
-        \Reflection::Export( new \ReflectionClass(__CLASS__) );
+        \Reflection::export( new \ReflectionClass(__CLASS__) );
     }
     
     function __destruct () {

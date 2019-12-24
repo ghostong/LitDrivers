@@ -7,64 +7,68 @@
 namespace Lit\Drivers;
 
 class LiMemcached {
-    protected $Host;
-    protected $Port;
-    protected $UserName;
-    protected $PassWord;
-    protected $Servers;
-    protected $DSNMd5;
-    protected $Env;
-    private static $Instance = array ();
-    function __construct ( $Host='127.0.0.1', $Port='11211', $UserName='', $PassWord='', $Servers = array() ) {
-        $this->Host = $Host;
-        $this->Port = $Port;
-        $this->UserName = $UserName;
-        $this->PassWord = $PassWord;
-        $this->Servers = $Servers;
-        $this->DSNMd5 = md5( $Host.':'.$Port.':'.$UserName.':'.$PassWord.":".serialize ($Servers) );
-        $this->Env = 'product';
+    protected $host;
+    protected $port;
+    protected $userName;
+    protected $passWord;
+    protected $servers;
+    protected $dsnMd5;
+    protected $env;
+    private static $instance = array ();
+    function __construct ( $host='127.0.0.1', $port='11211', $userName='', $passWord='', $servers = array() ) {
+        $this->host = $host;
+        $this->port = $port;
+        $this->userName = $userName;
+        $this->passWord = $passWord;
+        $this->servers = $servers;
+        $this->dsnMd5 = md5( $host.':'.$port.':'.$userName.':'.$passWord.":".serialize ($servers) );
+        $this->env = 'product';
+    }
+
+    //设置运行环境
+    public function setEnv ( $env ) {
+        $this->env = $env;
     }
 
     //创建连接
-    public function Connect () {
-        $ConnObj = &self::$Instance[$this->DSNMd5];
-        if ( !isset( $ConnObj ) || !is_object( $ConnObj ) ) {
+    public function connect () {
+        $memcacheObject = &self::$instance[$this->dsnMd5];
+        if ( !isset( $memcacheObject ) || !is_object( $memcacheObject ) ) {
             try {
-                $ConnObj = new \Memcached();
-                $ConnObj->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
-                $ConnObj->setOption(\Memcached::OPT_TCP_NODELAY, true); //php memcached有个bug,get不存在,有固定40ms延迟，开启此参数可以避免
-                if ( !empty($this->Servers) ) {
-                    $ConnObj->addServers( $this->Servers );
+                $memcacheObject = new \Memcached();
+                $memcacheObject->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
+                $memcacheObject->setOption(\Memcached::OPT_TCP_NODELAY, true); //php memcached有个bug,get不存在,有固定40ms延迟，开启此参数可以避免
+                if ( !empty($this->servers) ) {
+                    $memcacheObject->addservers( $this->servers );
                 }else{
-                    $ConnObj->addServer( $this->Host, $this->Port );
+                    $memcacheObject->addServer( $this->host, $this->port );
                 }
-                if ($this->UserName && $this->PassWord) {
-                    $ConnObj->setSaslAuthData($this->UserName,$this->PassWord);
+                if ($this->userName && $this->passWord) {
+                    $memcacheObject->setSaslAuthData($this->userName,$this->passWord);
                 }
-            } catch (Exception $e) {
-                if ( $this->Env == 'product' ) {
+            } catch (\Exception $e) {
+                if ( $this->env == 'product' ) {
                     die ('Memcached connection failed');
                 }else{
-                    echo $e->getMessage();
+                    die ( $e->getMessage() );
                 }
             }
         }
-        1;
-        return $ConnObj;
+        return $memcacheObject;
     }
 
-    public function Get ( $Key ) {
-        $Mem = $this->Connect();
+    public function get ( $Key ) {
+        $Mem = $this->connect();
         return $Mem->get( $Key );
     }
 
-    public function Set ( $Key, $Val, $Ttl = 0 ) {
-        $Mem = $this->Connect();
+    public function set ( $Key, $Val, $Ttl = 0 ) {
+        $Mem = $this->connect();
         return $Mem->set ($Key,$Val,$Ttl);
     }
 
-    public function FetchAll ( $KeyArr ) {
-        $Mem = $this->Connect();
+    public function fetchAll ( $KeyArr ) {
+        $Mem = $this->connect();
         $Mem->getDelayed($KeyArr);
         $Data = $Mem->fetchAll();
         $Ret = array();
@@ -74,8 +78,8 @@ class LiMemcached {
         return $Ret;
     }
 
-    public function Help(){
-        \Reflection::Export(new \ReflectionClass(__CLASS__));
+    public function help(){
+        \Reflection::export(new \ReflectionClass(__CLASS__));
     }
 
 }
