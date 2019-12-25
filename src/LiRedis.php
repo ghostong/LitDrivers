@@ -196,6 +196,11 @@ class LiRedis {
         return $redisClient->zCard ($key);
     }
 
+    public function zCount  ( $key, $start, $end){
+        $redisClient = $this->connect();
+        return $redisClient->zCount ($key, $start, $end );
+    }
+
     public function zRevRange ($key, $Start = 0,$End = 10) {
         $redisClient = $this->connect();
         return $redisClient->zRevRange($key,$Start,$End);
@@ -247,36 +252,24 @@ class LiRedis {
         return $redisClient->multi(\Redis::PIPELINE);
     }
 
+    public function exec (){
+        $redisClient = $this->connect();
+        $redisClient->exec();
+    }
 
-    //其他部分
+    //key操作
 
     public function rename($oldName , $newName){
         $redisClient = $this->connect();
         return $redisClient->rename($oldName,$newName);
     }
 
-    public function exec (){
-        $redisClient = $this->connect();
-        $redisClient->exec();
-    }
-
-    public function redisClose(){
-        $redisClient = self::$instance[$this->dsnMd5];
-        if ( is_object($redisClient) ){
-            $redisClient->close();
-            unset ($redisClient);
-        }
-    }
-    
     public function expire($key,$Seconds = 0){
         $redisClient = $this->connect();
     	return $redisClient->expire($key,$Seconds);
     }
 
-    public function getLastError (){
-        $redisClient = $this->connect();
-        return $redisClient->getLastError();
-    }
+
     
     //redis扩展功能
     /**
@@ -298,6 +291,18 @@ class LiRedis {
         }else{
             return 0;
         }
+    }
+
+    public function redisClose(){
+        $redisClient = self::$instance[$this->dsnMd5];
+        if ( is_object($redisClient) ){
+            $redisClient->close();
+            unset ($redisClient);
+        }
+    }
+    public function getLastError (){
+        $redisClient = $this->connect();
+        return $redisClient->getLastError();
     }
 
     public function Help(){
