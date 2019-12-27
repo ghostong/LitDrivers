@@ -190,6 +190,11 @@ class LiRedis {
         $redisClient = $this->connect();
         return $redisClient->zAdd($key,$score,$member);
     }
+
+    public function zRem( $key, $member ){
+        $redisClient = $this->connect();
+        return $redisClient->zRem($key, $member);
+    }
     
     public function zCard  ( $key ){
         $redisClient = $this->connect();
