@@ -12,7 +12,7 @@ class LiMySQL {
     protected $dsnMd5;
     protected $userName;
     protected $passWord;
-    protected $errorInfo;
+    protected $errorInfo = null;
     protected $lastInsertId = 0;
     protected $lastSql='';
     protected $env;
@@ -39,11 +39,7 @@ class LiMySQL {
                 $mySqlObject = new \PDO ( $this->dsn, $this->userName, $this->passWord );
                 $mySqlObject->setAttribute(\PDO::ATTR_EMULATE_PREPARES,false);
             } catch ( \PDOException $e ) {
-                if ( $this->env == 'product' ) {
-                    die ('Database connection failed');
-                }else{
-                    die ($e->getMessage());
-                }
+                $this->errorInfo = $e->getMessage();
             }
         }
         return $mySqlObject;

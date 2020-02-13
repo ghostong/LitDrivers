@@ -14,6 +14,7 @@ class LiMemcached {
     protected $servers;
     protected $dsnMd5;
     protected $env;
+    protected $errorInfo = null;
     private static $instance = array ();
     function __construct ( $host='127.0.0.1', $port='11211', $userName='', $passWord='', $servers = array() ) {
         $this->host = $host;
@@ -47,11 +48,7 @@ class LiMemcached {
                     $memcacheObject->setSaslAuthData($this->userName,$this->passWord);
                 }
             } catch (\Exception $e) {
-                if ( $this->env == 'product' ) {
-                    die ('Memcached connection failed');
-                }else{
-                    die ( $e->getMessage() );
-                }
+                $this->errorInfo = $e->getMessage();
             }
         }
         return $memcacheObject;
@@ -76,6 +73,10 @@ class LiMemcached {
             $Ret[$v['key']] = $v['value'];
         }
         return $Ret;
+    }
+
+    public function lastError () {
+        return $this->errorInfo;
     }
 
     public function help(){

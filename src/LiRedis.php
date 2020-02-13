@@ -16,6 +16,7 @@ class LiRedis {
     protected $lastKey;
     protected $dsnMd5;
     protected $env;
+    protected $errorInfo = null;
     private static $instance = array ();
 
     function __construct ( $host = '127.0.0.1', $port = 6379, $auth = '', $dbNum = 0) {
@@ -35,22 +36,18 @@ class LiRedis {
     //创建连接
     protected function connect () {
         $redisObject = &self::$instance[$this->dsnMd5];
-        if ( !isset( $redisObject ) || !is_object( $redisObject ) ) {
+        if ( is_null($redisObject) || !is_object( $redisObject ) ) {
             try {
                 $redisObject = new \Redis();
-                $redisObject->pconnect( $this->host, $this->port );
+                $redisObject->connect( $this->host, $this->port, 1 );
                 if ( $this->auth ) {
-                    $redisObject -> auth ( $this->auth );
+                    $redisObject->auth ( $this->auth );
                 }
-                if ( $this->dbNum > 0 ){
+                if ( is_numeric( $this->dbNum ) ){
                     $redisObject->select( $this->dbNum );
                 }
             } catch ( \Exception $e ) {
-                if ( $this->env == 'product' ) {
-                    die ('Redis connection failed');
-                }else{
-                    die ( $e->getMessage() );
-                }
+                $this->errorInfo = $e->getMessage();
             }
         }
         return $redisObject;
@@ -305,9 +302,13 @@ class LiRedis {
             unset ($redisClient);
         }
     }
-    public function getLastError (){
-        $redisClient = $this->connect();
-        return $redisClient->getLastError();
+    public function lastError (){
+        if ($this->errorInfo) {
+            return $this->errorInfo;
+        }else{
+            $redisClient = $this->connect();
+            return $redisClient->getLastError();
+        }
     }
 
     public function Help(){
