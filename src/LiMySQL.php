@@ -15,7 +15,6 @@ class LiMySQL {
     protected $errorInfo = null;
     protected $lastInsertId = 0;
     protected $lastSql='';
-    protected $env;
     private static $instance = array();
 
     function __construct ( $host='127.0.0.1', $port='3306', $userName='', $passWord='', $dbName='', $charSet='utf8' ) {
@@ -23,12 +22,6 @@ class LiMySQL {
         $this->dsnMd5 = md5 ($this->dsn );
         $this->userName = $userName;
         $this->passWord = $passWord;
-        $this->env = 'product';
-    }
-
-    //设置运行环境
-    public function setEnv ( $env ) {
-        $this->env = $env;
     }
     
     //创建连接

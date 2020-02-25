@@ -13,7 +13,6 @@ class LiMemcached {
     protected $passWord;
     protected $servers;
     protected $dsnMd5;
-    protected $env;
     protected $errorInfo = null;
     private static $instance = array ();
     function __construct ( $host='127.0.0.1', $port='11211', $userName='', $passWord='', $servers = array() ) {
@@ -23,12 +22,6 @@ class LiMemcached {
         $this->passWord = $passWord;
         $this->servers = $servers;
         $this->dsnMd5 = md5( $host.':'.$port.':'.$userName.':'.$passWord.":".serialize ($servers) );
-        $this->env = 'product';
-    }
-
-    //设置运行环境
-    public function setEnv ( $env ) {
-        $this->env = $env;
     }
 
     //创建连接

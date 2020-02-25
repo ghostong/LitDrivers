@@ -15,7 +15,6 @@ class LiRedis {
     protected $dbNum;
     protected $lastKey;
     protected $dsnMd5;
-    protected $env;
     protected $errorInfo = null;
     private static $instance = array ();
 
@@ -25,12 +24,6 @@ class LiRedis {
         $this->auth = $auth;
         $this->dbNum = $dbNum;
         $this->dsnMd5 = md5( $host.':'.$port.':'.$auth.':'.$dbNum );
-        $this->env = 'product';
-    }
-
-    //设置运行环境
-    public function setEnv ( $env ) {
-        $this->env = $env;
     }
 
     //创建连接
@@ -257,6 +250,11 @@ class LiRedis {
     public function exec (){
         $redisClient = $this->connect();
         $redisClient->exec();
+    }
+
+    public function scan( & $iterator, $key ){
+        $redisClient = $this->connect();
+        return $redisClient->scan( $iterator, $key );
     }
 
     //key操作
