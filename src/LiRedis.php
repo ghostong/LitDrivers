@@ -25,7 +25,7 @@ class LiRedis {
         $this->auth = $auth;
         $this->dbNum = $dbNum;
         $this->timeOut = $timeOut;
-        $this->dsnMd5 = md5( $host.':'.$port.':'.$auth.':'.$dbNum );
+        $this->dsnMd5 = md5( $host.':'.$port.':'.$auth.':'.$dbNum.':'.$timeOut );
     }
 
     //创建连接
