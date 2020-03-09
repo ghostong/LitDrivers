@@ -25,9 +25,9 @@ class LiMySQL {
     }
     
     //创建连接
-    protected function connect () {
+    protected function connect ( $force = false) {
         $mySqlObject = &self::$instance[$this->dsnMd5];
-        if ( is_null( $mySqlObject ) || !is_object( $mySqlObject ) ) {
+        if ( is_null($mySqlObject) || !is_object($mySqlObject) || $force ) {
             try {
                 $mySqlObject = new \PDO ( $this->dsn, $this->userName, $this->passWord );
                 $mySqlObject->setAttribute(\PDO::ATTR_EMULATE_PREPARES,false);
@@ -50,8 +50,15 @@ class LiMySQL {
         $pdoStatement = $pdo->query( $sql );
         $this->lastSql = $sql;
         if( !$pdoStatement ){
-            $this->errorInfo = $pdo->errorInfo();
-            return false;
+            $pdo = $this->connect(true);
+            $pdoStatement = $pdo->query( $sql );
+            $this->lastSql = $sql;
+            if( !$pdoStatement ){
+                $this->errorInfo = $pdo->errorInfo();
+                return false;
+            }else{
+                return $pdoStatement;
+            }
         }else{
             return $pdoStatement;
         }
@@ -102,8 +109,12 @@ class LiMySQL {
         $pdo = $this->connect();
         $pdoStatement = $pdo->prepare( $sql );
         if( !$pdoStatement ){
-            $this->errorInfo = $pdo->errorInfo();
-            return false;
+            $pdo = $this->connect(true);
+            $pdoStatement = $pdo->prepare( $sql );
+            if( !$pdoStatement ){
+                $this->errorInfo = $pdo->errorInfo();
+                return false;
+            }
         }
         if ( $pdoStatement->execute( $inputParam ) ) {
             $this->lastInsertId = $pdo->lastInsertId();
