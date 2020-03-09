@@ -13,16 +13,18 @@ class LiRedis {
     protected $auth;
     protected $passWord;
     protected $dbNum;
+    protected $timeOut;
     protected $lastKey;
     protected $dsnMd5;
     protected $errorInfo = null;
     private static $instance = array ();
 
-    function __construct ( $host = '127.0.0.1', $port = 6379, $auth = '', $dbNum = 0) {
+    function __construct ( $host = '127.0.0.1', $port = 6379, $auth = '', $dbNum = 0, $timeOut = 0) {
         $this->host = $host;
         $this->port = $port;
         $this->auth = $auth;
         $this->dbNum = $dbNum;
+        $this->timeOut = $timeOut;
         $this->dsnMd5 = md5( $host.':'.$port.':'.$auth.':'.$dbNum );
     }
 
@@ -32,7 +34,7 @@ class LiRedis {
         if ( is_null($redisObject) || !is_object( $redisObject ) ) {
             try {
                 $redisObject = new \Redis();
-                $redisObject->connect( $this->host, $this->port, 1 );
+                $redisObject->connect( $this->host, $this->port, $this->timeOut );
                 if ( $this->auth ) {
                     $redisObject->auth ( $this->auth );
                 }
