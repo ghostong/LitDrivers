@@ -27,7 +27,7 @@ class LiMySQL {
     //创建连接
     protected function connect () {
         $mySqlObject = &self::$instance[$this->dsnMd5];
-        if ( !isset( $mySqlObject ) || !is_object( $mySqlObject ) ) {
+        if ( !isset( $mySqlObject ) || !is_object( $mySqlObject) || !$this->podPing($mySqlObject) ) {
             try {
                 $mySqlObject = new \PDO ( $this->dsn, $this->userName, $this->passWord );
                 $mySqlObject->setAttribute(\PDO::ATTR_EMULATE_PREPARES,false);
@@ -36,6 +36,18 @@ class LiMySQL {
             }
         }
         return $mySqlObject;
+    }
+
+    //pdo 连接查看
+    function podPing( $mySqlObject ){
+        try{
+            $mySqlObject->getAttribute(\PDO::ATTR_SERVER_INFO);
+        } catch (\PDOException $e) {
+            if(strpos($e->getMessage(), 'MySQL server has gone away')!==false){
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
