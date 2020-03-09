@@ -7,11 +7,36 @@
 namespace Lit\Drivers;
 
 class LiRedis {
+    protected $host;
+    protected $port;
+    protected $auth;
+    protected $dbNum;
+    protected $timeOut;
+
+    function __construct ( $host = '127.0.0.1', $port = 6379, $auth = '', $dbNum = 0, $timeOut = 0) {
+        $this->host = $host;
+        $this->port = $port;
+        $this->auth = $auth;
+        $this->dbNum = $dbNum;
+        $this->timeOut = $timeOut;
+    }
+
+    function __call($name, $arguments){
+        $redis = new LiRedisBase($this->host, $this->port, $this->auth, $this->dbNum, $this->timeOut);
+        try{
+            return call_user_func_array([$redis,$name],$arguments);
+        }catch ( \Exception $e ){
+            $redis->connect(true);
+            return call_user_func_array([$redis,$name],$arguments);
+        }
+    }
+}
+
+class LiRedisBase {
 
     protected $host;
     protected $port;
     protected $auth;
-    protected $passWord;
     protected $dbNum;
     protected $timeOut;
     protected $lastKey;
@@ -25,16 +50,16 @@ class LiRedis {
         $this->auth = $auth;
         $this->dbNum = $dbNum;
         $this->timeOut = $timeOut;
-        $this->dsnMd5 = md5( $host.':'.$port.':'.$auth.':'.$dbNum.':'.$timeOut );
+        $this->dsnMd5 = md5( $host.':'.$port.':'.$auth.':'.$dbNum );
     }
 
     //创建连接
-    protected function connect () {
+    public function connect ( $force = false) {
         $redisObject = &self::$instance[$this->dsnMd5];
-        if ( is_null($redisObject) || !is_object( $redisObject ) ) {
+        if ( is_null($redisObject) || !is_object($redisObject) || $force ) {
             try {
                 $redisObject = new \Redis();
-                $redisObject->connect( $this->host, $this->port, $this->timeOut );
+                $redisObject->connect( $this->host, $this->port, $this->timeOut);
                 if ( $this->auth ) {
                     $redisObject->auth ( $this->auth );
                 }
@@ -69,7 +94,7 @@ class LiRedis {
         $redisClient = $this->connect();
         return $redisClient->del($key);
     }
-    
+
     public function keys ($Filed){
         $redisClient = $this->connect();
         return $redisClient->keys($Filed);
@@ -87,7 +112,7 @@ class LiRedis {
         $redisClient = $this->connect();
         return $redisClient->lPush($key,$str);
     }
-    
+
     public function rPush($key , $str = ''){
         $redisClient = $this->connect();
         return $redisClient->rPush($key,$str);
@@ -107,17 +132,17 @@ class LiRedis {
         $redisClient = $this->connect();
         return $redisClient->lLen($key);
     }
-    
+
     public function lRange($key,$Start,$End){
         $redisClient = $this->connect();
         return $redisClient->lRange($key,$Start,$End);
     }
-    
+
     public function lRem($key,$Start,$End){
         $redisClient = $this->connect();
         return $redisClient->lRem($key,$Start,$End);
     }
-    
+
     public function lTrim($key,$Start,$End){
         $redisClient = $this->connect();
         return $redisClient->lTrim($key,$Start,$End);
@@ -139,7 +164,7 @@ class LiRedis {
     public function hGetAll($key){
         $redisClient = $this->connect();
         return $redisClient->hGetAll($key);
-    
+
     }
 
     public function hLen($key){
@@ -176,8 +201,8 @@ class LiRedis {
     }
 
 
-     // 有序集合部分
-    
+    // 有序集合部分
+
     public function zAdd ( $key, $score, $member ){
         $redisClient = $this->connect();
         return $redisClient->zAdd($key,$score,$member);
@@ -187,7 +212,7 @@ class LiRedis {
         $redisClient = $this->connect();
         return $redisClient->zRem($key, $member);
     }
-    
+
     public function zCard  ( $key ){
         $redisClient = $this->connect();
         return $redisClient->zCard ($key);
@@ -202,7 +227,7 @@ class LiRedis {
         $redisClient = $this->connect();
         return $redisClient->zRevRange($key,$Start,$End);
     }
-    
+
     public function zRange ($key, $Start = 0,$End = 10) {
         $redisClient = $this->connect();
         return $redisClient->zRange( $key, $Start, $End );
@@ -222,10 +247,10 @@ class LiRedis {
         $redisClient = $this->connect();
         return $redisClient->zRangeByScore( $key, $start, $end,  $options );
     }
-    
-    
+
+
     // 订阅部分
-    
+
     public function subscribe ($Channel,$Callback){
         $redisClient = $this->connect();
         return $redisClient->subscribe($Channel,$Callback);
@@ -259,6 +284,7 @@ class LiRedis {
         return $redisClient->scan( $iterator, $key );
     }
 
+
     //key操作
 
     public function rename($oldName , $newName){
@@ -268,11 +294,10 @@ class LiRedis {
 
     public function expire($key,$Seconds = 0){
         $redisClient = $this->connect();
-    	return $redisClient->expire($key,$Seconds);
+        return $redisClient->expire($key,$Seconds);
     }
 
 
-    
     //redis扩展功能
     /**
      * 计数器
@@ -314,8 +339,8 @@ class LiRedis {
     public function Help(){
         \Reflection::export( new \ReflectionClass(__CLASS__) );
     }
-    
+
     function __destruct () {
-    
+
     }
 }
