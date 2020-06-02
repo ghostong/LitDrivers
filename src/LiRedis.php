@@ -21,6 +21,7 @@ class LiRedis {
         $this->timeOut = $timeOut;
     }
 
+    //解决Redis断线重连问题
     function __call($name, $arguments){
         $redis = new LiRedisBase($this->host, $this->port, $this->auth, $this->dbNum, $this->timeOut);
         try{
@@ -39,7 +40,6 @@ class LiRedisBase {
     protected $auth;
     protected $dbNum;
     protected $timeOut;
-    protected $lastKey;
     protected $dsnMd5;
     protected $errorInfo = null;
     private static $instance = array ();

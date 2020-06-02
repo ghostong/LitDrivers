@@ -17,7 +17,7 @@ class LiMySQL {
     protected $lastSql='';
     private static $instance = array();
 
-    function __construct ( $host='127.0.0.1', $port='3306', $userName='', $passWord='', $dbName='', $charSet='utf8' ) {
+    function __construct ( $host = '127.0.0.1', $port = '3306', $userName = '', $passWord = '', $dbName = '', $charSet = 'utf8' ) {
         $this->dsn = "mysql:host={$host};port=$port;dbname={$dbName};charset={$charSet}";
         $this->dsnMd5 = md5 ($this->dsn );
         $this->userName = $userName;
@@ -170,7 +170,7 @@ class LiMySQL {
      * @param $data
      * @return bool
      */
-    public function Add ( $table, $data ) {
+    public function add ( $table, $data ) {
         if ( !is_array($data) || empty($data) ) {
             return false;
         }

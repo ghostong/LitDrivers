@@ -12,38 +12,38 @@ $mysql2 = new LiMySQL('192.168.0.244','3306','root','123456','dbname') ;
 //获得帮助
 $mysql->Help();
 
-$mysql->FetchAll ("show variables like '%version%'") ;
+$mysql->fetchAll ("show variables like '%version%'") ;
 //$mysql2->FetchAll ("show variables like '%version%'") ;
 
 //从结果集中获取一行
-$mysql-> FetchOne ('select * from `user` where `id` = 1') ;
+$mysql-> fetchOne ('select * from `user` where `id` = 1') ;
 
 //获取包含结果集中所有行的数组
-$mysql-> FetchAll ('select * from `user` limit 10') ;
+$mysql-> fetchAll ('select * from `user` limit 10') ;
 
 //根据条件获取一条数据
-$mysql->GetOne( 'user', 'id = ? and id = ?', 1, 3 ) ;
+$mysql->getOne( 'user', 'id = ? and id = ?', 1, 3 ) ;
 
 //根据条件获取多条数据
-$mysql->GetAll( 'user', '1 limit ?', 4 );
+$mysql->getAll( 'user', '1 limit ?', 4 );
 
 //添加一条数据
-$mysql->Add ('user', array('user_name'=>'lily', 'age'=>12) ) ;
+$mysql->add ('user', array('user_name'=>'lily', 'age'=>12) ) ;
 
 //删除数据
-$mysql->Del ( 'user', 'id= ? or id = ?', 12 , 24 );
+$mysql->del ( 'user', 'id= ? or id = ?', 12 , 24 );
 
 //更新数据
-$mysql->Update( 'user', 'user_name=? where id = ?', 'lucy', 12 ) ;
+$mysql->update( 'user', 'user_name=? where id = ?', 'lucy', 12 ) ;
 
 //获取最后的错误信息
-$mysql->LastError() ;
+$mysql->lastError() ;
 
 //获取最后的SQL语句
-$mysql->LastSql() ;
+$mysql->lastSql() ;
 
 //获取最后的自增ID
-$mysql->LastInsertId() ;
+$mysql->lastInsertId() ;
 
 //more ...
 
@@ -56,14 +56,14 @@ $redis = new LiRedis('192.168.0.231');
 $redis2 = new LiRedis('192.168.0.232');
 
 //保存一条数据到Redis
-$redis->Set('OneOfRedisKey', 'I love Redis', 3600);
+$redis->set('OneOfRedisKey', 'I love Redis', 3600);
 
 //从Redis中获取一条数据
-$redis->Get ('OneOfRedisKey') ;
+$redis->get ('OneOfRedisKey') ;
 
-$redis->Lpush('OneOfList','I love Redis');
+$redis->lPush('OneOfList','I love Redis');
 
-$redis->Rpop('OneOfList','I love Redis') ;
+$redis->rPop('OneOfList','I love Redis') ;
 
 //more ...
 
@@ -82,6 +82,6 @@ $mem->get('OneOfMemcacheKey');
 //保存一条数据到Memcached
 $mem->set('OneOfMemcacheKey','30',0);
 
-$mem->FetchAll(['OneOfMemcacheKey','OneOfMemcacheKey1']) ;
+$mem->fetchAll(['OneOfMemcacheKey','OneOfMemcacheKey1']) ;
 
 //more ...
