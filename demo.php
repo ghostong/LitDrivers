@@ -19,10 +19,10 @@ $mysql->fetchOne('select * from `user` where `id` = 1');
 $mysql->fetchAll('select * from `user` limit 10');
 
 //根据条件获取一条数据
-$mysql->getOne('user', 'id = ? and id = ?', 1, 3);
+$mysql->getOne('user', [['id', '=', '1'], ['age', '=', 2]]);
 
 //根据条件获取多条数据
-$mysql->getAll('user', '1 limit ?', 4);
+$mysql->getAll('user', [['id', '>', '1'], ['age', '>', 2]]);
 
 //添加一条数据
 $mysql->add('user', array('user_name' => 'lily', 'age' => 12));

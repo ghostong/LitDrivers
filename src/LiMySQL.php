@@ -129,7 +129,7 @@ class LiMySQL
     /**
      * 根据条件获取一条数据
      * @param string $table 表名
-     * @param string $wheres where条件数组
+     * @param array $wheres where条件数组
      * @return array|mixed
      * @example: getOne ( 'table', [['id',8],['class_id', '= ', 6]] );
      */
@@ -151,9 +151,9 @@ class LiMySQL
      * @return array
      * @example: getAll ( 'table', [['id', '<', 8],['class_id', '>', 6]] );
      */
-    public function getAll($table, $wheres) {
+    public function getAll($table, $wheres, $limit = null) {
         list($where, $inputParam) = $this->sqlWhereFormat($wheres);
-        $sql = "select * from `{$table}` where {$where} ";
+        $sql = "select * from `{$table}` where {$where} " . ($limit ? " limit " . $limit : "");
         $pdoStatement = $this->execute($sql, $inputParam);
         if (!$pdoStatement) {
             return array();
