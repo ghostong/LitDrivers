@@ -128,14 +128,14 @@ class LiMySQL
 
     /**
      * 根据条件获取一条数据
-     * @param $table
-     * @param $expression
+     * @param string $table 表名
+     * @param string $wheres where条件数组
      * @return array|mixed
-     * @example: getOne ( 'table', 'id = ? and `class_id` = ?' , 8, 6 );
+     * @example: getOne ( 'table', [['id',8],['class_id', '= ', 6]] );
      */
-    public function getOne($table, $expression /*[, $inputParam, $inputParam, ... ]*/) {
-        $sql = "select * from {$table} where {$expression} limit 1";
-        $inputParam = $this->getInputParam(func_get_args(), 2);
+    public function getOne($table, $wheres) {
+        list($where, $inputParam) = $this->sqlWhereFormat($wheres);
+        $sql = "select * from `{$table}` where {$where} limit 1";
         $pdoStatement = $this->execute($sql, $inputParam);
         if (!$pdoStatement) {
             return array();
@@ -146,14 +146,14 @@ class LiMySQL
 
     /**
      * 根据条件获取多条数据
-     * @param $table
-     * @param $expression
+     * @param string $table 表名
+     * @param array $wheres where 条件数组
      * @return array
-     * @example: getAll ( 'table', '`class_id` = ? ' , 6 );
+     * @example: getAll ( 'table', [['id', '<', 8],['class_id', '>', 6]] );
      */
-    public function getAll($table, $expression /*[, $inputParam, $inputParam, ... ]*/) {
-        $sql = "select * from {$table} where $expression ";
-        $inputParam = $this->getInputParam(func_get_args(), 2);
+    public function getAll($table, $wheres) {
+        list($where, $inputParam) = $this->sqlWhereFormat($wheres);
+        $sql = "select * from `{$table}` where {$where} ";
         $pdoStatement = $this->execute($sql, $inputParam);
         if (!$pdoStatement) {
             return array();
@@ -220,14 +220,21 @@ class LiMySQL
 
     /**
      * 更新操作
-     * @param $table
-     * @param $expression
+     * @param string $table 表名称
+     * @param array $sets set数组
+     * @param array $wheres where条件数组
      * @return int
-     * @example: update ( 'table', 'set `age` = `age` + 1 where `id` < ?', 10 )
+     * @example: update ( 'table', ['age' => 1],[['id', '<', 10],['age', 0]] )
      */
-    public function update($table, $expression /*[, $inputParam, $inputParam, ... ]*/) {
-        $sql = "update `{$table}` set {$expression}";
-        $inputParam = $this->getInputParam(func_get_args(), 2);
+    public function update($table, $sets, $wheres) {
+        if (empty($sets) || empty($wheres)) {
+            return 0;
+        }
+        list($set, $inputParam1) = $this->sqlSetFormat($sets);
+        list($where, $inputParam2) = $this->sqlWhereFormat($wheres);
+
+        $sql = "update `{$table}` set {$set} where {$where}";
+        $inputParam = array_merge($inputParam1, $inputParam2);
         $pdoStatement = $this->execute($sql, $inputParam);
         if (!$pdoStatement) {
             return 0;
@@ -256,8 +263,24 @@ class LiMySQL
         return $this->lastSql;
     }
 
-    function __destruct() {
+    protected function sqlSetFormat($sets) {
+        $set = array_map(function ($k) {
+            return "`$k` = ?";
+        }, array_keys($sets));
+        return [implode(", ", $set), array_values($sets)];
+    }
 
+    protected function sqlWhereFormat($wheres) {
+        $whereArray = $inputValues = [];
+        foreach ($wheres as $where) {
+            if (count($where) == 2) {
+                $whereArray[] = "`{$where[0]}` = ?";
+            } elseif (count($where) == 3) {
+                $whereArray[] = "`{$where[0]}` {$where[1]} ?";
+            }
+            $inputValues[] = end($where);
+        }
+        return [implode(" and ", $whereArray), $inputValues];
     }
 
 }
