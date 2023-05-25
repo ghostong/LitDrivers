@@ -28,12 +28,22 @@ class LiMySQL
     //创建连接
     protected function connect($force = false) {
         $mySqlObject = &self::$instance[$this->dsnMd5];
-        if (is_null($mySqlObject) || !is_object($mySqlObject) || $force) {
-            try {
+        try {
+            if (is_null($mySqlObject) || !is_object($mySqlObject) || $force) {
                 $mySqlObject = new \PDO ($this->dsn, $this->userName, $this->passWord);
                 $mySqlObject->setAttribute(\PDO::ATTR_EMULATE_PREPARES, false);
-            } catch (\PDOException $e) {
-                $this->errorInfo = $e->getMessage();
+            }
+        } catch (\Exception $exception) {
+            $this->errorInfo = $exception->getMessage();
+        }
+
+        try {
+            $mySqlObject->query("select 1");
+        } catch (\Exception $exception) {
+            if ($exception->getCode() == "HY000") {
+                self::connect(true);
+            } else {
+                $this->errorInfo = $exception->getMessage();
             }
         }
         return $mySqlObject;
@@ -51,15 +61,8 @@ class LiMySQL
         $pdoStatement = $pdo->query($sql);
         $this->lastSql = $sql;
         if (!$pdoStatement) {
-            $pdo = $this->connect(true);
-            $pdoStatement = $pdo->query($sql);
-            $this->lastSql = $sql;
-            if (!$pdoStatement) {
-                $this->errorInfo = $pdo->errorInfo();
-                return false;
-            } else {
-                return $pdoStatement;
-            }
+            $this->errorInfo = $pdo->errorInfo();
+            return false;
         } else {
             return $pdoStatement;
         }
@@ -110,12 +113,8 @@ class LiMySQL
         $pdo = $this->connect();
         $pdoStatement = $pdo->prepare($sql);
         if (!$pdoStatement) {
-            $pdo = $this->connect(true);
-            $pdoStatement = $pdo->prepare($sql);
-            if (!$pdoStatement) {
-                $this->errorInfo = $pdo->errorInfo();
-                return false;
-            }
+            $this->errorInfo = $pdo->errorInfo();
+            return false;
         }
         if ($pdoStatement->execute($inputParam)) {
             $this->lastInsertId = $pdo->lastInsertId();
